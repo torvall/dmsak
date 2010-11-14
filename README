@@ -1,0 +1,74 @@
+=========================================
+   DMSAK - Drupal Multi-Site Admin Kit
+=========================================
+
+Copyright 2009 António Maria Torre do Valle
+  Web: http://www.torvall.net/
+ Mail: torvall at gmail dot com
+
+Released under the GNU General Public Licence (GPL):
+http://www.gnu.org/licenses/gpl-3.0.html
+
+
+What is this:
+=============
+DMSAK is a group of scripts aimed at easing management of secure Drupal multi-site 
+installations. These tools allow you to create and delete webs and update 
+modules and Drupal code bases automatically.
+Features:
+ * Fully automates Drupal installation and webs creation;
+ * Handles various Drupal code base versions simultaneously at the same server;
+ * Creates backups automatically;
+ * Easy to use command line syntax.
+
+
+How Drupal multi-site installations work:
+=========================================
+In this model, to have a secure, multi-site setup from a single code base, a 
+directory is created for the web site containing some links to core Drupal code 
+base directories (like misc, modules, themes and sites) and wrappers to the main 
+php files.
+This approach allows running several sites off the same codebase, and to contain 
+sites data in a single directory. There are other different approaches, some of 
+them are simpler, others, not. This one requires you to have a different virtual 
+host for each web.
+Read more about multi-site installs here: http://drupal.org/node/43816
+and here: http://justinhileman.info/blog/2007/06/a-more-secure-drupal-multisite-install
+
+
+Using the kit:
+==============
+To start, edit dmsak.cfg and set the values to match your setup.
+If you wish to "install" the kit, simply copy the scripts to a directory on your 
+$PATH (ex: /usr/local/bin) and the configuration file (dmsak.cfg) to /etc. The 
+scripts can be run from any directory, and will look for the config in the 
+current working folder (./dmsak.cfg), the current users home (~/dmsak.cfg) or 
+/etc/dmsak.cfg (in that order). Failing all that, it will use default values (you
+can check the values that will be used by default using the "-h" option).
+IMPORTANT: In order for these scripts to work, Drupal's code base directory must 
+be named "drupal-X" where X is the version number.
+Website directories must match the website URL (with or without "www").
+The upmodule.sh script updates the module either at the code base directory 
+(drupal-X/sites/all/modules), or the web directory 
+(example.com/sites/example.com/modules).
+The mkweb.sh script appends a rewrite rule directive to .htaccess to map the long 
+"sites/example.com/files" to simply "files". Go to admin/settings/file-system to 
+set the files directory path to point to "files".
+
+
+Notes:
+======
+This is still an early release and many features are still missing (including BD 
+support).
+DMSAK is not intended to be a replacement for modules like Drush 
+(http://drupal.org/project/drush). This kit is only aimed at maintaining 
+multi-site setups easily.
+These scripts were only tested with versions 5 and 6 of Drupal. If you tested 
+other versions, please send me some feedback (versions tested, issues, etc.)
+
+
+More info:
+==========
+To get more information about DMSAK, please go to http://www.torvall.net/
+Alternatively, you can contact me by email at torvall at gmail dot com.
+
