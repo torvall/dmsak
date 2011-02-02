@@ -78,7 +78,7 @@ done
 
 # Check if help was requested.
 if [ "$HELP_REQUESTED" = "TRUE" ]; then
-	echo 1>&2 "This script updates Drupal code base"
+	echo 1>&2 "This script updates a Drupal code base"
 	echo 1>&2 "Copyright 2009 by António Maria Torre do Valle"
 	echo 1>&2 "Released under the GNU General Public Licence (GPL)"
 	echo 1>&2 "More info at: http://www.torvall.net"

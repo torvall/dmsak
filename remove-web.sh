@@ -96,7 +96,7 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "  -h  Shows this help message"
 	echo 1>&2 "  -d  Location of base Drupal directories (default: $DRUPAL_DIR)"
 	echo 1>&2 "  -w  Directory containing websites (default: $WEBS_DIR)"
-	echo 1>&2 "  -v  Drupal version (5 or 6, others still untested) (default: $DRUPAL_VERSION)"
+	echo 1>&2 "  -v  Drupal version (5, 6 or 7, others still untested) (default: $DRUPAL_VERSION)"
 	echo 1>&2 "  -R  Force deletion of web folder. Without this option, the script only removes the web's symlink from Drupal's base folder."
 	echo 1>&2 "  -N  Do not backup data prior to removal (only effective with -R)"
 	echo 1>&2 "  <website> is the domain name of the website to be deleted (ex: example.com)"

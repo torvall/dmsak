@@ -84,7 +84,7 @@ done
 
 # Check if help was requested.
 if [ "$HELP_REQUESTED" = "TRUE" ]; then
-	echo 1>&2 "This script deletes a Drupal \"secure virtual folder\""
+	echo 1>&2 "This script installs a Drupal module"
 	echo 1>&2 "Copyright 2009 by António Maria Torre do Valle"
 	echo 1>&2 "Released under the GNU General Public Licence (GPL)"
 	echo 1>&2 "More info at: http://www.torvall.net"
@@ -139,7 +139,7 @@ if [ "$WEB_URL" != "" ]; then
 else
 	# Check parameters to update module in Drupal code base dir.
 	if [ "$DRUPAL_VERSION" = "" -o "$DRUPAL_DIR" = "" -o "$NEW_MODULE_PATH" = "" ]; then
-		echo 1>&2 Usage: $0 -d /var/wwwlib -w /var/www -v 6 -N module-6.x-1.10.tar.gz
+		echo 1>&2 Usage: $0 -d /var/lib -w /var/www -v 6 -N module-6.x-1.10.tar.gz
 		echo 1>&2    Or: $0 -W example.com -N module-6.x-1.10.tar.gz
 		exit 127
 	fi

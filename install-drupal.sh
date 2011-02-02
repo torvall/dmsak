@@ -76,7 +76,7 @@ done
 
 # Check if help was requested.
 if [ "$HELP_REQUESTED" = "TRUE" ]; then
-	echo 1>&2 "This script deletes a Drupal \"secure virtual folder\""
+	echo 1>&2 "This script installs a Drupal code base"
 	echo 1>&2 "Copyright 2009 by António Maria Torre do Valle"
 	echo 1>&2 "Released under the GNU General Public Licence (GPL)"
 	echo 1>&2 "More info at: http://www.torvall.net"
@@ -87,10 +87,10 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "  -h  Shows this help message"
 	echo 1>&2 "  -d  Location of base Drupal directories (default: $DRUPAL_DIR)"
 	echo 1>&2 "  -v  Drupal version to use (5, 6 or 7 others still untested) (default: $DRUPAL_VERSION)"
-	echo 1>&2 "  <path-to-drupal-tarball> is the path to the Drupal code base to be installed (ex: drupal-5.10.tar.gz)"
+	echo 1>&2 "  <path-to-drupal-tarball> is the path to the Drupal code base to be installed (ex: drupal-6.10.tar.gz)"
 	echo 1>&2 "  Parameters -d and -v are optional. See the config file (dmsak.cfg) to set the defaults."
 	echo 1>&2 ""
-	echo 1>&2 "Example: $0 -d /var/wwwlib -v 6 drupal-6.10.tar.gz"
+	echo 1>&2 "Example: $0 -d /var/lib -v 6 drupal-6.10.tar.gz"
 	exit 0
 fi
 
@@ -102,7 +102,7 @@ DRUPAL_TARBALL="$@"
 
 # Check parameters.
 if [ "$WEBS_DIR" = "" -o "$DRUPAL_DIR" = "" -o "$DRUPAL_VERSION" = "" -o "$DRUPAL_TARBALL" = "" ]; then
-	echo 1>&2 Usage: $0 -d /var/wwwlib -v 6 drupal-6.10.tar.gz
+	echo 1>&2 Usage: $0 -d /var/lib -v 6 drupal-6.10.tar.gz
 	exit 127
 fi
 
