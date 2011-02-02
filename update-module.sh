@@ -197,8 +197,8 @@ mv $TEMP_DIR/$MODULE_NAME $MODULES_DIR
 echo "Directory moved to $MODULES_DIR/$MODULE_NAME."
 
 # Display some form of success message to the user.
-echo
 echo "All done."
+echo
 echo $SUCCESS_MESSAGE
 
 exit 0
