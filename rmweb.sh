@@ -127,7 +127,7 @@ if [ ! -e $DRUPAL_BASE_DIR ]; then
 	exit 127
 fi
 
-# Check if web directory already exists.
+# Check if web directory exists.
 if [ ! -e $WEBS_DIR/$OLD_WEB ]; then
 	echo "Oops! Directory $WEBS_DIR/$OLD_WEB does not exist. Aborting."
 	exit 127
@@ -153,6 +153,18 @@ if [ "$REMOVE_FOLDER" = "TRUE" ]; then
 	echo "Deleting web files..."
 	rm -R $WEBS_DIR/$OLD_WEB
 	echo "Directory $WEBS_DIR/$OLD_WEB deleted"
+	# Now get rid of the database.
+	echo "Deleting database..."
+	# Get database password interactively if not specified in config.
+	if [ "$DB_PASS" = "" ]; then
+		read -s -p "Enter $DB_USER's database password: " TEMP_PASS
+		DB_PASS=${TEMP_PASS}
+		echo
+	fi
+	DB_NAME=${OLD_WEB//./_}
+	# Drop database.
+	mysqladmin --host=$DB_HOST --user=$DB_USER --password=$DB_PASS drop "$DB_NAME"
+	echo "Database deleted."
 fi
 
 echo

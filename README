@@ -38,15 +38,17 @@ and here: http://justinhileman.info/blog/2007/06/a-more-secure-drupal-multisite-
 
 Using the kit:
 ==============
-To start, edit dmsak.cfg and set the values to match your setup.
-If you wish to "install" the kit, simply copy the scripts to a directory on your 
-$PATH (ex: /usr/local/bin) and the configuration file (dmsak.cfg) to /etc. The 
-scripts can be run from any directory, and will look for the config in the 
-current working folder (./dmsak.cfg), the current users home (~/dmsak.cfg) or 
-/etc/dmsak.cfg (in that order). Failing all that, it will use default values (you
-can check the values that will be used by default using the "-h" option).
+To start, copy example-dmsak.cfg to dmsak.cfg and set there the values to match
+your setup. If you wish to "install" the kit, simply copy the scripts to a
+directory on your $PATH (ex: /usr/local/bin) and the configuration file
+(dmsak.cfg) to /etc. The scripts can be run from any directory, and will look for
+the config in the current working folder (./dmsak.cfg), the current users home
+(~/dmsak.cfg) or /etc/dmsak.cfg (in that order). Failing all that, it will use
+default values (you can check the values that will be used by default using
+the "-h" option).
 IMPORTANT: In order for these scripts to work, Drupal's code base directory must 
-be named "drupal-X" where X is the version number.
+be named "drupal-X" where X is the version number. If you already have an existing
+code base installed, you may need to rename it.
 Website directories must match the website URL (with or without "www").
 The upmodule.sh script updates the module either at the code base directory 
 (drupal-X/sites/all/modules), or the web directory 

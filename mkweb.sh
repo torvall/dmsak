@@ -154,10 +154,7 @@ mkdir $WEBS_DIR/$NEW_WEB/sites
 mkdir $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB
 mkdir $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/modules
 mkdir $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/themes
-mkdir $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/files
 
-# Make the files folder writable.
-chmod o+w $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/files
 
 # Link the newly created sites/$NEW_WEB directory from Drupal's sites dir.
 ln -s $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB $DRUPAL_BASE_DIR/sites/$NEW_WEB
@@ -180,6 +177,11 @@ if [ "$SHORT_FILES_URLS" = "TRUE" ]; then
 	echo "RewriteCond %{REQUEST_FILENAME} !-f" >> $WEBS_DIR/$NEW_WEB/files/.htaccess
 	echo "RewriteCond %{REQUEST_FILENAME} !-d" >> $WEBS_DIR/$NEW_WEB/files/.htaccess
 	echo "RewriteRule ^(.*)$ /sites/$NEW_WEB/files/\$1 [L]" >> $WEBS_DIR/$NEW_WEB/files/.htaccess
+else
+	# Create the standard example.com/sites/example.com/files folder.
+	mkdir $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/files
+	# Make the files folder writable.
+	chmod o+w $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/files
 fi
 
 # Copy the default settings.php file.
@@ -190,7 +192,7 @@ chmod o+w $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php
 
 # Append some required configuration variables to settings.php.
 # Uncomment the following line to let this script setup the file system configuration options automatically for you.
-#echo "\$conf = array('file_directory_path' => 'sites/$NEW_WEB/files', 'file_directory_temp' => '$TEMP_DIR');" >> $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB1/settings.php
+#echo "\$conf = array('file_directory_path' => 'sites/$NEW_WEB/files', 'file_directory_temp' => '$TEMP_DIR');" >> $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php
 
 # Link to the required folders inside Drupal's directory.
 ln -s $DRUPAL_BASE_DIR/misc $WEBS_DIR/$NEW_WEB/misc
@@ -203,6 +205,32 @@ echo "<?php chdir('$DRUPAL_BASE_DIR'); include('./cron.php'); ?>" > $WEBS_DIR/$N
 echo "<?php chdir('$DRUPAL_BASE_DIR'); include('./update.php'); ?>" > $WEBS_DIR/$NEW_WEB/update.php
 echo "<?php chdir('$DRUPAL_BASE_DIR'); include('./xmlrpc.php'); ?>" > $WEBS_DIR/$NEW_WEB/xmlrpc.php
 echo "<?php chdir('$DRUPAL_BASE_DIR'); include('./install.php'); ?>" > $WEBS_DIR/$NEW_WEB/install.php
+
+# Enter DB creation stage.
+DB_NAME=${NEW_WEB//./_}
+echo "Creating database $DB_NAME..."
+
+# Get database password interactively if not specified in config.
+if [ "$DB_PASS" = "" ]; then
+	read -s -p "Enter $DB_USER's database password: " TEMP_PASS
+	DB_PASS=${TEMP_PASS}
+	echo
+fi
+
+# Create database.
+mysqladmin --host=$DB_HOST --user=$DB_USER --password=$DB_PASS create $DB_NAME
+echo "Database $DB_NAME created."
+
+# Grant permissions to user on the database.
+SQL_CMD="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON $DB_NAME.* TO $DB_USER@$DB_HOST IDENTIFIED BY '$DB_PASS';"
+mysql --silent --host=$DB_HOST --user=$DB_USER --password=$DB_PASS $DB_NAME << EOF
+	$SQL_CMD
+EOF
+echo "Permissions set on database."
+
+# Set the database configuration.
+sed -i "s/mysql:\/\/username:password@localhost\/databasename/mysql:\/\/$DB_USER:$DB_PASS@$DB_HOST\/$DB_NAME/g" $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php
+echo "Database config set on settings.php."
 
 # Report success to the user.
 echo "Created structure for site $NEW_WEB."
