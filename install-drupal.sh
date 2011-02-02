@@ -132,10 +132,12 @@ tar zxf $DRUPAL_TARBALL -C $TEMP_DIR
 echo "Tarball extracted to $NEW_DRUPAL_TMP."
 
 # Create default folders.
-echo "Creating default folders..."
-mkdir $NEW_DRUPAL_TMP/sites/all/modules
-mkdir $NEW_DRUPAL_TMP/sites/all/themes
-echo "Default folders created."
+if [ $DRUPAL_VERSION -le "6" ] ; then
+	echo "Creating default folders..."
+	mkdir $NEW_DRUPAL_TMP/sites/all/modules
+	mkdir $NEW_DRUPAL_TMP/sites/all/themes
+	echo "Default folders created."
+fi
 
 # Install new codebase.
 echo "Moving new install to $DRUPAL_BASE_DIR..."

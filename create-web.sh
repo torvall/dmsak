@@ -192,9 +192,11 @@ fi
 # Copy the default settings.php file.
 cp $SETTINGS_FILE $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php
 
-# Make settings.php read only for D6 or lower. D7 does that on its own.
+# Make settings.php read only for D6 or lower or writable for D7.
 if [ $DRUPAL_VERSION -le "6" ] ; then
 	chmod o-w $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php
+else
+	chmod a+w $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php
 fi
 
 # Append some required configuration variables to settings.php.
@@ -233,11 +235,22 @@ if [ "$NO_DATABASE" != "TRUE" ]; then
 	SQL_CMD="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON $DB_NAME.* TO $DB_USER@$DB_HOST IDENTIFIED BY '$DB_PASS'; FLUSH PRIVILEGES;"
 	mysql --silent --host=$DB_HOST --user=$DB_USER --password=$DB_PASS $DB_NAME << EOF
 		$SQL_CMD
-	EOF
+EOF
 	echo "Permissions set on database."
 
+	# Determine configuration changes to be done.
+	DB_STRING_OLD=""
+	DB_STRING_NEW=""
+	if [ $DRUPAL_VERSION -le "6" ] ; then
+		DB_STRING_OLD="mysql:\/\/username:password@localhost\/databasename"
+		DB_STRING_NEW="mysql:\/\/$DB_USER:$DB_PASS@$DB_HOST\/$DB_NAME"
+	else
+		DB_STRING_OLD="\$databases = array();"
+		DB_STRING_NEW="\$databases[\'default\'][\'default\'] = array(\n  \'driver\' => \'mysql\',\n  \'database\' => \'$DB_NAME\',\n  \'username\' => \'$DB_USER\',\n  \'password\' => \'$DB_PASS\',\n  \'host\' => \'$DB_HOST\',\n  \'prefix\' => \'\',\n  \'collation\' => \'utf8_general_ci\',\n);"
+	fi
+
 	# Set the database configuration.
-	sed -i "s/mysql:\/\/username:password@localhost\/databasename/mysql:\/\/$DB_USER:$DB_PASS@$DB_HOST\/$DB_NAME/g" $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php
+	sed -i "s/$DB_STRING_OLD/$DB_STRING_NEW/g" $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php
 	echo "Database config set on settings.php."
 fi
 
