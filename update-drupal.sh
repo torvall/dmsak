@@ -20,12 +20,12 @@
 # You should have received a copy of the GNU General Public License
 # along with DMSAK. If not, see <http://www.gnu.org/licenses/>.
 #
-#     Usage: updrupal.sh [-d <path-to-drupal-dirs>] [-v N] <path-to-drupal-tarball>
+#     Usage: update-drupal.sh [-d <path-to-drupal-dirs>] [-v N] <path-to-drupal-tarball>
 #
-#   Example: updrupal.sh -d /var/wwwlib -v 5 drupal-5.10.tar.gz
-# Or simply: updrupal.sh drupal-5.10.tar.gz
+#   Example: update-drupal.sh -d /var/wwwlib -v 6 drupal-6.10.tar.gz
+# Or simply: update-drupal.sh drupal-6.10.tar.gz
 #
-# This script assumes that Drupal folders are named "drupal-X" where X is the version number (5 or 6).
+# This script assumes that Drupal folders are named "drupal-X" where X is the version number (5, 6 or 7).
 #
 # More info at: http://www.torvall.net
 
@@ -41,11 +41,14 @@ else
 			DMSAK_CONFIG=./dmsak.cfg
 		else
 			# Set reasonable values for the defaults.
-			DRUPAL_DIR="/var/wwwlib"
+			DRUPAL_VERSION="6"
+			DRUPAL_DIR="/var/lib"
 			WEBS_DIR="/var/www"
-			DRUPAL_VERSION="5"
-			BACKUP_DIR="/var/www"
+			BACKUP_DIR="/root"
 			TEMP_DIR="/tmp"
+			DB_HOST="localhost"
+			DB_USER="root"
+			DB_PASS=""
 		fi
 	fi
 fi
@@ -85,12 +88,12 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "Parameters:"
 	echo 1>&2 "  -h  Shows this help message"
 	echo 1>&2 "  -d  Location of base Drupal directories (default: $DRUPAL_DIR)"
-	echo 1>&2 "  -v  Drupal version to use (5 or 6, others still untested) (default: $DRUPAL_VERSION)"
+	echo 1>&2 "  -v  Drupal version to use (5, 6 or 7, others still untested) (default: $DRUPAL_VERSION)"
 	echo 1>&2 "  -N  Do not backup folder before update"
-	echo 1>&2 "  <path-to-drupal-tarball> is the path to the package that contains the version to be installed (ex: drupal-5.10.tar.gz)"
+	echo 1>&2 "  <path-to-drupal-tarball> is the path to the package that contains the version to be installed (ex: drupal-6.10.tar.gz)"
 	echo 1>&2 "  Parameters -d and -v are optional. See the config file (dmsak.cfg) to set the defaults."
 	echo 1>&2 ""
-	echo 1>&2 "Example: $0 -d /var/wwwlib -v 5 drupal-5.10.tar.gz"
+	echo 1>&2 "Example: $0 -v 6 drupal-6.10.tar.gz"
 	exit 0
 fi
 
@@ -102,7 +105,7 @@ NEW_PACKAGE="$@"
 
 # Check parameters.
 if [ "$DRUPAL_VERSION" = "" -o "$DRUPAL_DIR" = "" -o "$NEW_PACKAGE" = "" ]; then
-	echo 1>&2 Usage: $0 -d /var/wwwlib -v 5 drupal-5.10.tar.gz
+	echo 1>&2 Usage: $0 -d /var/lib -v 6 drupal-6.10.tar.gz
 	exit 127
 fi
 
@@ -110,7 +113,7 @@ fi
 # Remember that you must have a directory named "drupal-X" where X is its version (5 or 6) at $DRUPAL_DIR.
 DRUPAL_BASE_DIR="$DRUPAL_DIR/drupal-$DRUPAL_VERSION"
 
-DRUPAL_BACKUP_TARBALL=$BACKUP_DIR/drupal-$DRUPAL_VERSION`date +_%Y%m%d%H%M`_backup.tar.gz
+DRUPAL_BACKUP_TARBALL=$BACKUP_DIR/drupal-$DRUPAL_VERSION-`date +%Y%m%d%H%M`-backup.tar.gz
 NEW_PACKAGE_TARBALL=`basename $NEW_PACKAGE`
 NEW_PACKAGE_TMP="$TEMP_DIR/${NEW_PACKAGE_TARBALL%.tar.gz}"
 
@@ -153,7 +156,6 @@ echo "Moving new install to final location..."
 mv $NEW_PACKAGE_TMP $DRUPAL_BASE_DIR
 echo "All done."
 echo "Don't forget to update.php all sites that use version $DRUPAL_VERSION!"
-echo
 
 exit 0
 

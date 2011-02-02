@@ -21,13 +21,13 @@
 # along with DMSAK. If not, see <http://www.gnu.org/licenses/>.
 #
 #
-# instdmod.sh - Installs a new Drupal module.
+# install-module.sh - Installs a new Drupal module.
 #
-#     Usage: instdmod.sh [-d <path-to-drupal-dirs> [-v X] | -w <path-to-web-dir>] <path-to-module-tarball>
+#     Usage: install-module.sh [-d <path-to-drupal-dirs> [-v X] | -w <path-to-webs-dir>] <path-to-module-tarball>
 #
-#   Example: instdmod.sh -d /var/wwwlib -v 5 module-5.x-1.10.tar.gz
-#        Or: instdmod.sh -w /var/www/example.com module-5.x-1.10.tar.gz
-# Or simply: instdmod.sh module-5.x-1.10.tar.gz
+#   Example: install-module.sh -d /var/lib -v 6 module-6.x-1.10.tar.gz
+#        Or: install-module.sh -W example.com module-6.x-1.10.tar.gz
+# Or simply: install-module.sh module-6.x-1.10.tar.gz
 #
 # More info at: http://www.torvall.net
 
@@ -43,11 +43,14 @@ else
 			DMSAK_CONFIG=./dmsak.cfg
 		else
 			# Set reasonable values for the defaults.
-			DRUPAL_DIR="/var/wwwlib"
+			DRUPAL_VERSION="6"
+			DRUPAL_DIR="/var/lib"
 			WEBS_DIR="/var/www"
-			DRUPAL_VERSION="5"
-			BACKUP_DIR="/var/www"
+			BACKUP_DIR="/root"
 			TEMP_DIR="/tmp"
+			DB_HOST="localhost"
+			DB_USER="root"
+			DB_PASS=""
 		fi
 	fi
 fi
@@ -92,15 +95,15 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "  -h  Shows this help message"
 	echo 1>&2 "  -d  Location of base Drupal directories (default: $DRUPAL_DIR)"
 	echo 1>&2 "  -w  Directory containing websites (default: $WEBS_DIR)"
-	echo 1>&2 "  -v  Drupal version (5 or 6, others still untested) (default: $DRUPAL_VERSION)"
+	echo 1>&2 "  -v  Drupal version (5, 6 or 7, others still untested) (default: $DRUPAL_VERSION)"
 	echo 1>&2 "  -W  Website to update (ex: example.com)"
 	echo 1>&2 "  -N  Do not backup old module folder"
-	echo 1>&2 "  <path-to-module-tarball> is the path to the package that contains the module to be installed (ex: module-5.x-1.10.tar.gz)"
+	echo 1>&2 "  <path-to-module-tarball> is the path to the package that contains the module to be installed (ex: module-6.x-1.10.tar.gz)"
 	echo 1>&2 "  If the -W option is specified, parameters -d and -v will be ignored."
 	echo 1>&2 "  Parameters -d, -w and -v are optional, and the configured values will be used. See the config file dmsak.cfg."
 	echo 1>&2 ""
-	echo 1>&2 "Example: instdmod.sh -d /var/wwwlib -v 5 module-5.x-1.10.tar.gz"
-	echo 1>&2 "     Or: instdmod.sh -w /var/www/example.com module-5.x-1.10.tar.gz"
+	echo 1>&2 "Example: $0 -d /var/wwwlib -v 6 module-6.x-1.10.tar.gz"
+	echo 1>&2 "     Or: $0 -W example.com module-6.x-1.10.tar.gz"
 	exit 0
 fi
 
@@ -117,8 +120,8 @@ MODULE_NAME=`expr substr $NEW_MODULE_FILENAME 1 $SEPARATOR_POSITION`
 if [ "$WEB_URL" != "" ]; then
 	# Check parameters to update module in web dir.
 	if [ "$WEBS_DIR" = "" -o "$NEW_MODULE_PATH" = "" ]; then
-		echo 1>&2 Usage: $0 -d /var/wwwlib -w /var/www -v 5 -N module-5.x-1.10.tar.gz
-		echo 1>&2    Or: $0 -W example.com -N module-5.x-1.10.tar.gz
+		echo 1>&2 Usage: $0 -d /var/lib -w /var/www -v 6 -N module-6.x-1.10.tar.gz
+		echo 1>&2    Or: $0 -W example.com -N module-6.x-1.10.tar.gz
 		exit 127
 	fi
 
@@ -136,8 +139,8 @@ if [ "$WEB_URL" != "" ]; then
 else
 	# Check parameters to update module in Drupal code base dir.
 	if [ "$DRUPAL_VERSION" = "" -o "$DRUPAL_DIR" = "" -o "$NEW_MODULE_PATH" = "" ]; then
-		echo 1>&2 Usage: $0 -d /var/wwwlib -w /var/www -v 5 -N module-5.x-1.10.tar.gz
-		echo 1>&2    Or: $0 -W example.com -N module-5.x-1.10.tar.gz
+		echo 1>&2 Usage: $0 -d /var/wwwlib -w /var/www -v 6 -N module-6.x-1.10.tar.gz
+		echo 1>&2    Or: $0 -W example.com -N module-6.x-1.10.tar.gz
 		exit 127
 	fi
 
@@ -179,7 +182,6 @@ echo "Directory moved to $MODULES_DIR/$MODULE_NAME."
 # Display some form of success message to the user.
 echo
 echo "All done."
-echo
 
 exit 0
 

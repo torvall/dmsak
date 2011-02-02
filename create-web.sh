@@ -20,12 +20,12 @@
 # You should have received a copy of the GNU General Public License
 # along with DMSAK. If not, see <http://www.gnu.org/licenses/>.
 #
-#     Usage: mkweb.sh [-d <path-to-drupal-dirs>] [-w <path-to-webs-dir>] [-v N] <website>
+#     Usage: create-web.sh [-d <path-to-drupal-dirs>] [-w <path-to-webs-dir>] [-v N] <website>
 #
-#   Example: mkweb.sh -d /var/wwwlib -w /var/www -v 5 example.com
-# Or simply: mkweb.sh example.com
+#   Example: create-web.sh -d /var/wwwlib -w /var/www -v 6 example.com
+# Or simply: create-web.sh example.com
 #
-# This script assumes that Drupal folders are named "drupal-X" where X is the version number (5 or 6).
+# This script assumes that Drupal folders are named "drupal-X" where X is the version number (5, 6 or 7).
 #
 # More info at: http://www.torvall.net
 
@@ -41,11 +41,14 @@ else
 			DMSAK_CONFIG=./dmsak.cfg
 		else
 			# Set reasonable values for the defaults.
-			DRUPAL_DIR="/var/wwwlib"
+			DRUPAL_VERSION="6"
+			DRUPAL_DIR="/var/lib"
 			WEBS_DIR="/var/www"
-			DRUPAL_VERSION="5"
-			BACKUP_DIR="/var/www"
+			BACKUP_DIR="/root"
 			TEMP_DIR="/tmp"
+			DB_HOST="localhost"
+			DB_USER="root"
+			DB_PASS=""
 		fi
 	fi
 fi
@@ -68,6 +71,9 @@ do
 		v)
 			DRUPAL_VERSION="$OPTARG"
 			;;
+		n)
+			NO_DATABASE="TRUE"
+			;;
 		s)
 			SHORT_FILES_URLS="TRUE"
 			;;
@@ -78,7 +84,7 @@ done
 
 # Check if help was requested.
 if [ "$HELP_REQUESTED" = "TRUE" ]; then
-	echo 1>&2 "This script creates a Drupal \"secure virtual folder\""
+	echo 1>&2 "This script creates a Drupal-based web including its database"
 	echo 1>&2 "Copyright 2009 by António Maria Torre do Valle"
 	echo 1>&2 "Released under the GNU General Public Licence (GPL)"
 	echo 1>&2 "More info at: http://www.torvall.net"
@@ -89,14 +95,13 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "  -h  Shows this help message"
 	echo 1>&2 "  -d  Location of base Drupal directories (default: $WEBS_DIR)"
 	echo 1>&2 "  -w  Directory where site is to be created at (default: $DRUPAL_DIR)"
-	echo 1>&2 "  -v  Drupal version to use (5 or 6, others still untested) (default: $DRUPAL_VERSION)"
+	echo 1>&2 "  -v  Drupal version to use (5, 6 or 7, others still untested) (default: $DRUPAL_VERSION)"
+	echo 1>&2 "  -n  Do not create a database"
 	echo 1>&2 "  -s  Enable short 'files' URLs (EXPERIMENTAL FEATURE)"
 	echo 1>&2 "  <website> is the domain name of the website to be created (ex: example.com)"
 	echo 1>&2 "  Parameters -d, -w and -v are optional. See the config file (dmsak.cfg) to set the defaults."
 	echo 1>&2 ""
-	echo 1>&2 "Example: $0 -d /var/wwwlib -w /var/www -v 5 example.com"
-	echo 1>&2 ""
-	echo 1>&2 "This script does not create databases automatically (yet, work is in progress)."
+	echo 1>&2 "Example: $0 -v 6 example.com"
 	exit 0
 fi
 
@@ -108,7 +113,7 @@ NEW_WEB="$@"
 
 # Check parameters.
 if [ "$WEBS_DIR" = "" -o "$DRUPAL_VERSION" = "" -o "$DRUPAL_DIR" = "" -o "$NEW_WEB" = "" ]; then
-	echo 1>&2 Usage: $0 -d /var/wwwlib -w /var/www -v 5 example.com
+	echo 1>&2 Usage: $0 -d /var/lib -w /var/www -v 6 example.com
 	exit 127
 fi
 
@@ -187,8 +192,10 @@ fi
 # Copy the default settings.php file.
 cp $SETTINGS_FILE $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php
 
-# Remove the read only restriction from settings.php.
-chmod o+w $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php
+# Make settings.php read only for D6 or lower. D7 does that on its own.
+if [ $DRUPAL_VERSION -le "6" ] ; then
+	chmod o-w $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php
+fi
 
 # Append some required configuration variables to settings.php.
 # Uncomment the following line to let this script setup the file system configuration options automatically for you.
@@ -206,44 +213,43 @@ echo "<?php chdir('$DRUPAL_BASE_DIR'); include('./update.php'); ?>" > $WEBS_DIR/
 echo "<?php chdir('$DRUPAL_BASE_DIR'); include('./xmlrpc.php'); ?>" > $WEBS_DIR/$NEW_WEB/xmlrpc.php
 echo "<?php chdir('$DRUPAL_BASE_DIR'); include('./install.php'); ?>" > $WEBS_DIR/$NEW_WEB/install.php
 
-# Enter DB creation stage.
-DB_NAME=${NEW_WEB//./_}
-echo "Creating database $DB_NAME..."
+# Create DB, unless the user said not to.
+if [ "$NO_DATABASE" != "TRUE" ]; then
+	echo "Creating database..."
+	DB_NAME=${NEW_WEB//./_}
 
-# Get database password interactively if not specified in config.
-if [ "$DB_PASS" = "" ]; then
-	read -s -p "Enter $DB_USER's database password: " TEMP_PASS
-	DB_PASS=${TEMP_PASS}
-	echo
+	# Get database password interactively if not specified in config.
+	if [ "$DB_PASS" = "" ]; then
+		read -s -p "Enter $DB_USER's database password: " TEMP_PASS
+		DB_PASS=${TEMP_PASS}
+		echo
+	fi
+
+	# Create database.
+	mysqladmin --host=$DB_HOST --user=$DB_USER --password=$DB_PASS create $DB_NAME
+	echo "Database $DB_NAME created."
+
+	# Grant permissions to user on the database.
+	SQL_CMD="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON $DB_NAME.* TO $DB_USER@$DB_HOST IDENTIFIED BY '$DB_PASS'; FLUSH PRIVILEGES;"
+	mysql --silent --host=$DB_HOST --user=$DB_USER --password=$DB_PASS $DB_NAME << EOF
+		$SQL_CMD
+	EOF
+	echo "Permissions set on database."
+
+	# Set the database configuration.
+	sed -i "s/mysql:\/\/username:password@localhost\/databasename/mysql:\/\/$DB_USER:$DB_PASS@$DB_HOST\/$DB_NAME/g" $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php
+	echo "Database config set on settings.php."
 fi
 
-# Create database.
-mysqladmin --host=$DB_HOST --user=$DB_USER --password=$DB_PASS create $DB_NAME
-echo "Database $DB_NAME created."
-
-# Grant permissions to user on the database.
-SQL_CMD="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON $DB_NAME.* TO $DB_USER@$DB_HOST IDENTIFIED BY '$DB_PASS';"
-mysql --silent --host=$DB_HOST --user=$DB_USER --password=$DB_PASS $DB_NAME << EOF
-	$SQL_CMD
-EOF
-echo "Permissions set on database."
-
-# Set the database configuration.
-sed -i "s/mysql:\/\/username:password@localhost\/databasename/mysql:\/\/$DB_USER:$DB_PASS@$DB_HOST\/$DB_NAME/g" $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php
-echo "Database config set on settings.php."
-
 # Report success to the user.
-echo "Created structure for site $NEW_WEB."
+echo "Web $NEW_WEB created."
 
 # Tell the user the next steps to take.
 echo
-echo "You should now edit the file $DRUPAL_BASE_DIR/sites/$NEW_WEB/settings.php to configure your new website."
+echo "You now can edit the file $DRUPAL_BASE_DIR/sites/$NEW_WEB/settings.php to customize extended settings."
 echo "Then setup the vdir in Apache (if you haven't already) and browse to http://$NEW_WEB/install.php to finish the install."
 echo "Don't forget to delete the install.php file after properly setting up Drupal:"
-echo "  rm $WEBS_DIR/$NEW_WEB/install.php"
-echo "...and to remove the write permissions from settings.php:"
-echo "  chmod o-w $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/settings.php"
+echo " # rm $WEBS_DIR/$NEW_WEB/install.php"
 echo "Good luck!"
-echo
 
 exit 0

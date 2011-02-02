@@ -20,12 +20,12 @@
 # You should have received a copy of the GNU General Public License
 # along with DMSAK. If not, see <http://www.gnu.org/licenses/>.
 #
-#     Usage: rmweb.sh [-d <path-to-drupal-dirs>] [-w <path-to-webs-dir>] [-v N] [-R] [-N] <website>
+#     Usage: remove-web.sh [-d <path-to-drupal-dirs>] [-w <path-to-webs-dir>] [-v N] [-R] [-N] <website>
 #
-#   Example: rmweb.sh -d /var/wwwlib -w /var/www -v 5 -R -N example.com
-# Or simply: rmweb.sh example.com
+#   Example: remove-web.sh -d /var/lib -w /var/www -v 6 -R -N example.com
+# Or simply: remove-web.sh -R example.com
 #
-# This script assumes that Drupal folders are named "drupal-X" where X is the version number (5 or 6).
+# This script assumes that Drupal folders are named "drupal-X" where X is the version number (5, 6 or 7).
 #
 # More info at: http://www.torvall.net
 
@@ -41,11 +41,14 @@ else
 			DMSAK_CONFIG=./dmsak.cfg
 		else
 			# Set reasonable values for the defaults.
-			DRUPAL_DIR="/var/wwwlib"
+			DRUPAL_VERSION="6"
+			DRUPAL_DIR="/var/lib"
 			WEBS_DIR="/var/www"
-			DRUPAL_VERSION="5"
-			BACKUP_DIR="/var/www"
+			BACKUP_DIR="/root"
 			TEMP_DIR="/tmp"
+			DB_HOST="localhost"
+			DB_USER="root"
+			DB_PASS=""
 		fi
 	fi
 fi
@@ -69,7 +72,7 @@ do
 			DRUPAL_VERSION="$OPTARG"
 			;;
 		R)
-			REMOVE_FOLDER="TRUE"
+			REMOVE_DATA="TRUE"
 			;;
 		N)
 			NO_BACKUP="TRUE"
@@ -81,7 +84,8 @@ done
 
 # Check if help was requested.
 if [ "$HELP_REQUESTED" = "TRUE" ]; then
-	echo 1>&2 "This script deletes a Drupal \"secure virtual folder\""
+	echo 1>&2 "This script disables a Drupal \"secure virtual folder\" and deletes its data, if requested."
+	echo 1>&2 "Unless specified by the user, all data (files and database) will be automatically backed up."
 	echo 1>&2 "Copyright 2009 by António Maria Torre do Valle"
 	echo 1>&2 "Released under the GNU General Public Licence (GPL)"
 	echo 1>&2 "More info at: http://www.torvall.net"
@@ -93,14 +97,12 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "  -d  Location of base Drupal directories (default: $DRUPAL_DIR)"
 	echo 1>&2 "  -w  Directory containing websites (default: $WEBS_DIR)"
 	echo 1>&2 "  -v  Drupal version (5 or 6, others still untested) (default: $DRUPAL_VERSION)"
-	echo 1>&2 "  -R  Force deletion of web folder. Without this option, the script only removes the symlink from Drupal's base folder."
-	echo 1>&2 "  -N  Do not backup folder prior to removal (only effective with -R)"
+	echo 1>&2 "  -R  Force deletion of web folder. Without this option, the script only removes the web's symlink from Drupal's base folder."
+	echo 1>&2 "  -N  Do not backup data prior to removal (only effective with -R)"
 	echo 1>&2 "  <website> is the domain name of the website to be deleted (ex: example.com)"
 	echo 1>&2 "  Parameters -d, -w and -v are optional. See the config file (dmsak.cfg) to set the defaults."
 	echo 1>&2 ""
-	echo 1>&2 "Example: $0 -d /var/wwwlib -w /var/www -v 5 -R -N example.com"
-	echo 1>&2 ""
-	echo 1>&2 "This script does not delete databases automatically (yet, work is in progress)."
+	echo 1>&2 "Example: $0 -v 6 -R example.com"
 	exit 0
 fi
 
@@ -112,7 +114,7 @@ OLD_WEB="$@"
 
 # Check parameters.
 if [ "$WEBS_DIR" = "" -o "$DRUPAL_VERSION" = "" -o "$DRUPAL_DIR" = "" -o "$OLD_WEB" = "" ]; then
-	echo 1>&2 Usage: $0 -d /var/wwwlib -w /var/www -v 5 example.com
+	echo 1>&2 Usage: $0 -d /var/lib -w /var/www -v 6 example.com
 	exit 127
 fi
 
@@ -139,22 +141,8 @@ if [ -e $DRUPAL_BASE_DIR/sites/$OLD_WEB ]; then
 	echo "Symlink $DRUPAL_BASE_DIR/sites/$OLD_WEB deleted"
 fi
 
-# Remove folder if requested by user.
-if [ "$REMOVE_FOLDER" = "TRUE" ]; then
-	# Do a backup unless the users said not to.
-	if [ ! "$NO_BACKUP" = "TRUE" ]; then
-		echo "Backing up data..."
-		tar zcf $BACKUP_DIR/$OLD_WEB`date +_%Y%m%d%H%M`_backup.tar.gz -C $WEBS_DIR $OLD_WEB
-		echo "Backed up data to $WEBS_DIR/$OLD_WEB`date +_%Y%m%d%H%M`_backup.tar.gz"
-	else
-		echo "-N option specified. Data will not be backed up."
-	fi
-	# Delete the folder and all its contents.
-	echo "Deleting web files..."
-	rm -R $WEBS_DIR/$OLD_WEB
-	echo "Directory $WEBS_DIR/$OLD_WEB deleted"
-	# Now get rid of the database.
-	echo "Deleting database..."
+# Remove folder and database if requested by user.
+if [ "$REMOVE_DATA" = "TRUE" ]; then
 	# Get database password interactively if not specified in config.
 	if [ "$DB_PASS" = "" ]; then
 		read -s -p "Enter $DB_USER's database password: " TEMP_PASS
@@ -162,13 +150,28 @@ if [ "$REMOVE_FOLDER" = "TRUE" ]; then
 		echo
 	fi
 	DB_NAME=${OLD_WEB//./_}
+	# Do a backup unless the user said not to.
+	if [ ! "$NO_BACKUP" = "TRUE" ]; then
+		echo "Backing up data..."
+		CURR_DATE_STRING=`date +%Y%m%d%H%M`
+		mysqldump --host=$DB_HOST --user=$DB_USER --password=$DB_PASS $DB_NAME > "$WEBS_DIR/$OLD_WEB/$OLD_WEB-$CURR_DATE_STRING-db.sql"
+		echo "Database exported."
+		tar zcf $BACKUP_DIR/$OLD_WEB-$CURR_DATE_STRING-backup.tar.gz -C $WEBS_DIR $OLD_WEB
+		echo "Backed up data to $BACKUP_DIR/$OLD_WEB-$CURR_DATE_STRING-backup.tar.gz"
+	else
+		echo "-N option specified. Data will be deleted without any backup!"
+	fi
 	# Drop database.
+	echo "Deleting database..."
 	mysqladmin --host=$DB_HOST --user=$DB_USER --password=$DB_PASS drop "$DB_NAME"
 	echo "Database deleted."
+	# Delete the folder and all its contents.
+	echo "Deleting web files..."
+	rm -R $WEBS_DIR/$OLD_WEB
+	echo "Directory $WEBS_DIR/$OLD_WEB deleted"
 fi
 
 echo
 echo "All done."
-echo
 
 exit 0

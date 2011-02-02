@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # DMSAK - Drupal Multi-Site Admin Kit
-# This script creates a Drupal "secure virtual folder".
+# This script installs a Drupal codebase.
 #
 # Copyright 2009 António Maria Torre do Valle
 # Released under the GNU General Public Licence (GPL): http://www.gnu.org/licenses/gpl-3.0.html
@@ -21,12 +21,12 @@
 # along with DMSAK. If not, see <http://www.gnu.org/licenses/>.
 #
 #
-# instdrupal.sh - Installs a new Drupal code base.
+# install-drupal.sh - Installs a new Drupal code base.
 #
-#     Usage: instdrupal.sh [-d <path-to-drupal-dirs>] [-v N] <path-to-drupal-tarball>
+#     Usage: install-drupal.sh [-d <path-to-drupal-dirs>] [-v N] <path-to-drupal-tarball>
 #
-#   Example: instdrupal.sh -d /var/wwwlib -v 5 drupal-5.10.tar.gz
-# Or simply: instdrupal.sh drupal-5.10.tar.gz
+#   Example: install-drupal.sh -d /var/lib -v 6 drupal-6.10.tar.gz
+# Or simply: install-drupal.sh drupal-6.10.tar.gz
 #
 # More info at: http://www.torvall.net
 
@@ -42,11 +42,14 @@ else
 			DMSAK_CONFIG=./dmsak.cfg
 		else
 			# Set reasonable values for the defaults.
-			DRUPAL_DIR="/var/wwwlibx"
+			DRUPAL_VERSION="6"
+			DRUPAL_DIR="/var/lib"
 			WEBS_DIR="/var/www"
-			DRUPAL_VERSION="5"
-			BACKUP_DIR="/var/www"
+			BACKUP_DIR="/root"
 			TEMP_DIR="/tmp"
+			DB_HOST="localhost"
+			DB_USER="root"
+			DB_PASS=""
 		fi
 	fi
 fi
@@ -83,11 +86,11 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "Parameters:"
 	echo 1>&2 "  -h  Shows this help message"
 	echo 1>&2 "  -d  Location of base Drupal directories (default: $DRUPAL_DIR)"
-	echo 1>&2 "  -v  Drupal version to use (5 or 6, others still untested) (default: $DRUPAL_VERSION)"
+	echo 1>&2 "  -v  Drupal version to use (5, 6 or 7 others still untested) (default: $DRUPAL_VERSION)"
 	echo 1>&2 "  <path-to-drupal-tarball> is the path to the Drupal code base to be installed (ex: drupal-5.10.tar.gz)"
 	echo 1>&2 "  Parameters -d and -v are optional. See the config file (dmsak.cfg) to set the defaults."
 	echo 1>&2 ""
-	echo 1>&2 "Example: $0 -d /var/wwwlib -v 5 drupal-5.10.tar.gz"
+	echo 1>&2 "Example: $0 -d /var/wwwlib -v 6 drupal-6.10.tar.gz"
 	exit 0
 fi
 
@@ -99,7 +102,7 @@ DRUPAL_TARBALL="$@"
 
 # Check parameters.
 if [ "$WEBS_DIR" = "" -o "$DRUPAL_DIR" = "" -o "$DRUPAL_VERSION" = "" -o "$DRUPAL_TARBALL" = "" ]; then
-	echo 1>&2 Usage: $0 -d /var/wwwlib -v 5 drupal-5.10.tar.gz
+	echo 1>&2 Usage: $0 -d /var/wwwlib -v 6 drupal-6.10.tar.gz
 	exit 127
 fi
 
@@ -138,7 +141,6 @@ echo "Default folders created."
 echo "Moving new install to $DRUPAL_BASE_DIR..."
 mv $NEW_DRUPAL_TMP $DRUPAL_BASE_DIR
 echo "All done."
-echo
 
 exit 0
 

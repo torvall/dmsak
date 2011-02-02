@@ -20,13 +20,14 @@
 # You should have received a copy of the GNU General Public License
 # along with DMSAK. If not, see <http://www.gnu.org/licenses/>.
 # 
-#     Usage: uptheme.sh [-d <path-to-drupal-dirs> [-v X] | -w <path-to-web-dir>] [-N] <path-to-theme-tarball>
+#     Usage: update-theme.sh [-d <path-to-drupal-dirs>] [-w <path-to-webs-dir>] [-v X] [-N] <path-to-theme-tarball>
+#        Or: update-theme.sh [-N] [-W <website>] <path-to-theme-tarball>
 #
-#   Example: uptheme.sh -d /var/wwwlib -v 5 -N theme-5.x-1.10.tar.gz
-#        Or: uptheme.sh -w /var/www/example.com -v 5 -N theme-5.x-1.10.tar.gz
-# Or simply: uptheme.sh theme-5.x-1.10.tar.gz
+#   Example: update-theme.sh -d /var/lib -v 6 -N theme-6.x-1.10.tar.gz
+#        Or: update-theme.sh -W example.com -v 6 -N theme-6.x-1.10.tar.gz
+# Or simply: update-theme.sh theme-6.x-1.10.tar.gz
 #
-# This script assumes that Drupal folders are named "drupal-X" where X is the version number (5 or 6).
+# This script assumes that Drupal folders are named "drupal-X" where X is the version number (5, 6 or 7).
 #
 # More info at: http://www.torvall.net
 
@@ -42,11 +43,14 @@ else
 			DMSAK_CONFIG=/etc/dmsak.cfg
 		else
 			# Set reasonable values for the defaults.
-			DRUPAL_DIR="/var/wwwlib"
+			DRUPAL_VERSION="6"
+			DRUPAL_DIR="/var/lib"
 			WEBS_DIR="/var/www"
-			DRUPAL_VERSION="5"
-			BACKUP_DIR="/var/www"
+			BACKUP_DIR="/root"
 			TEMP_DIR="/tmp"
+			DB_HOST="localhost"
+			DB_USER="root"
+			DB_PASS=""
 		fi
 	fi
 fi
@@ -88,22 +92,22 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "Released under the GNU General Public Licence (GPL)"
 	echo 1>&2 "More info at: http://www.torvall.net"
 	echo 1>&2 ""
-	echo 1>&2 "Usage: $0 [-d <path-to-drupal-dirs>] [-w <path-to-web-dir>] [-v X] [-N] <path-to-theme-tarball>"
+	echo 1>&2 "Usage: $0 [-d <path-to-drupal-dirs>] [-w <path-to-webs-dir>] [-v X] [-N] <path-to-theme-tarball>"
 	echo 1>&2 "   Or: $0 [-N] [-W <website>] <path-to-theme-tarball>"
 	echo 1>&2 ""
 	echo 1>&2 "Parameters:"
 	echo 1>&2 "  -h  Shows this help message"
 	echo 1>&2 "  -d  Location of base Drupal directories (default: $DRUPAL_DIR)"
 	echo 1>&2 "  -w  Directory containing websites (default: $WEBS_DIR)"
-	echo 1>&2 "  -v  Drupal version (5 or 6, others still untested) (default: $DRUPAL_VERSION)"
+	echo 1>&2 "  -v  Drupal version (5, 6 or 7, others still untested) (default: $DRUPAL_VERSION)"
 	echo 1>&2 "  -W  Website to update (ex: example.com)"
 	echo 1>&2 "  -N  Do not backup old theme folder"
-	echo 1>&2 "  <path-to-theme-tarball> is the path to the package that contains the theme to be installed (ex: theme-5.x-1.10.tar.gz)"
+	echo 1>&2 "  <path-to-theme-tarball> is the path to the package that contains the theme to be installed (ex: theme-6.x-1.10.tar.gz)"
 	echo 1>&2 "  If the -W option is specified, parameters -d and -v will be ignored."
-	echo 1>&2 "  Parameters -d, -w and -v are optional, and the configured values will be used. See the config file dmsak.cfg."
+	echo 1>&2 "  Parameters -d, -w and -v are optional, and the configured values will be used by default. See the config file dmsak.cfg."
 	echo 1>&2 ""
-	echo 1>&2 "Example: $0 -d /var/wwwlib -w /var/www -v 5 -N theme-5.x-1.10.tar.gz"
-	echo 1>&2 "     Or: $0 -W example.com -N theme-5.x-1.10.tar.gz"
+	echo 1>&2 "Example: $0 -d /var/lib -w /var/www -v 6 -N theme-6.x-1.10.tar.gz"
+	echo 1>&2 "     Or: $0 -W example.com -N theme-6.x-1.10.tar.gz"
 	exit 0
 fi
 
@@ -120,8 +124,8 @@ THEME_NAME=`expr substr $NEW_THEME_FILENAME 1 $SEPARATOR_POSITION`
 if [ "$WEB_URL" != "" ]; then
 	# Check parameters to update theme in web dir.
 	if [ "$WEBS_DIR" = "" -o "$NEW_THEME_PATH" = "" ]; then
-		echo 1>&2 Usage: $0 -d /var/wwwlib -w /var/www -v 5 -N theme-5.x-1.10.tar.gz
-		echo 1>&2    Or: $0 -W example.com -N theme-5.x-1.10.tar.gz
+		echo 1>&2 Usage: $0 -d /var/lib -w /var/www -v 6 -N theme-6.x-1.10.tar.gz
+		echo 1>&2    Or: $0 -W example.com theme-6.x-1.10.tar.gz
 		exit 127
 	fi
 
@@ -139,8 +143,8 @@ if [ "$WEB_URL" != "" ]; then
 else
 	# Check parameters to update theme in Drupal code base dir.
 	if [ "$DRUPAL_VERSION" = "" -o "$DRUPAL_DIR" = "" -o "$NEW_THEME_PATH" = "" ]; then
-		echo 1>&2 Usage: $0 -d /var/wwwlib -w /var/www -v 5 -N theme-5.x-1.10.tar.gz
-		echo 1>&2    Or: $0 -W example.com -N theme-5.x-1.10.tar.gz
+		echo 1>&2 Usage: $0 -d /var/lib -w /var/www -v 6 -N theme-6.x-1.10.tar.gz
+		echo 1>&2    Or: $0 -W example.com theme-6.x-1.10.tar.gz
 		exit 127
 	fi
 
@@ -165,7 +169,7 @@ fi
 
 # Backup data unless otherwise specified by user.
 if [ ! "$NO_BACKUP" = "TRUE" ]; then
-	THEME_BACKUP_TARBALL=$BACKUP_DIR/$THEME_NAME`date +_%Y%m%d%H%M`_backup.tar.gz
+	THEME_BACKUP_TARBALL=$BACKUP_DIR/$THEME_NAME-`date +%Y%m%d%H%M`-backup.tar.gz
 	echo "Backing up data..."
 	tar zcf $THEME_BACKUP_TARBALL -C $THEMES_DIR $THEME_NAME
 	echo "Backed up theme folder to $THEME_BACKUP_TARBALL."
@@ -191,8 +195,6 @@ echo "Directory moved to $THEMES_DIR/$THEME_NAME."
 # Display some form of success message to the user.
 echo
 echo "All done."
-echo $SUCCESS_MESSAGE
-echo
 
 exit 0
 

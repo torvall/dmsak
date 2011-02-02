@@ -23,11 +23,11 @@
 #
 # instdmod.sh - Installs a new Drupal theme.
 #
-#     Usage: instdtheme.sh [-d <path-to-drupal-dirs> [-v X] | -w <path-to-web-dir>] <path-to-theme-tarball>
+#     Usage: install-theme.sh [-d <path-to-drupal-dirs> [-v X] | -w <path-to-webs-dir>] <path-to-theme-tarball>
 #
-#   Example: instdtheme.sh -d /var/wwwlib -v 5 theme-5.x-1.10.tar.gz
-#        Or: instdtheme.sh -w /var/www/example.com theme-5.x-1.10.tar.gz
-# Or simply: instdtheme.sh theme-5.x-1.10.tar.gz
+#   Example: install-theme.sh -d /var/lib -v 6 theme-6.x-1.10.tar.gz
+#        Or: install-theme.sh -W example.com theme-6.x-1.10.tar.gz
+# Or simply: install-theme.sh theme-6.x-1.10.tar.gz
 #
 # More info at: http://www.torvall.net
 
@@ -43,11 +43,14 @@ else
 			DMSAK_CONFIG=./dmsak.cfg
 		else
 			# Set reasonable values for the defaults.
-			DRUPAL_DIR="/var/wwwlib"
+			DRUPAL_VERSION="6"
+			DRUPAL_DIR="/var/lib"
 			WEBS_DIR="/var/www"
-			DRUPAL_VERSION="5"
-			BACKUP_DIR="/var/www"
+			BACKUP_DIR="/root"
 			TEMP_DIR="/tmp"
+			DB_HOST="localhost"
+			DB_USER="root"
+			DB_PASS=""
 		fi
 	fi
 fi
@@ -86,20 +89,21 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "Released under the GNU General Public Licence (GPL)"
 	echo 1>&2 "More info at: http://www.torvall.net"
 	echo 1>&2 ""
-	echo 1>&2 "Usage: $0 [-d <path-to-drupal-dirs> [-v X] | -w <path-to-web-dir>] <path-to-theme-tarball>"
+	echo 1>&2 "Usage: $0 [-d <path-to-drupal-dirs> [-v X] | -W <path-to-web-dir>] <path-to-theme-tarball>"
 	echo 1>&2 ""
 	echo 1>&2 "Parameters:"
 	echo 1>&2 "  -h  Shows this help message"
 	echo 1>&2 "  -d  Location of base Drupal directories (default: $DRUPAL_DIR)"
 	echo 1>&2 "  -w  Directory containing websites (default: $WEBS_DIR)"
-	echo 1>&2 "  -v  Drupal version (5 or 6, others still untested) (default: $DRUPAL_VERSION)"
-	echo 1>&2 "  -W  Website to update (ex: example.com)"
-	echo 1>&2 "  <path-to-theme-tarball> is the path to the package that contains the theme to be installed (ex: theme-5.x-1.10.tar.gz)"
+	echo 1>&2 "  -v  Drupal version (5, 6 or 7, others still untested) (default: $DRUPAL_VERSION)"
+	echo 1>&2 "  -W  Specify website the theme is to be locally installed (ex: example.com)"
+	echo 1>&2 "  <path-to-theme-tarball> is the path to the package that contains the theme to be installed (ex: theme-6.x-1.10.tar.gz)"
 	echo 1>&2 "  If the -W option is specified, parameters -d and -v will be ignored."
-	echo 1>&2 "  Parameters -d, -w and -v are optional, and the configured values will be used. See the config file dmsak.cfg."
+	echo 1>&2 "  Parameters -d, -w and -v are optional, and the configured values will be used by default. See the config file dmsak.cfg."
 	echo 1>&2 ""
-	echo 1>&2 "Example: instdtheme.sh -d /var/wwwlib -v 5 theme-5.x-1.10.tar.gz"
-	echo 1>&2 "     Or: instdtheme.sh -w /var/www/example.com theme-5.x-1.10.tar.gz"
+	echo 1>&2 "  Example: $0 -d /var/lib -v 6 theme-6.x-1.10.tar.gz"
+	echo 1>&2 "       Or: $0 -W example.com theme-6.x-1.10.tar.gz"
+	echo 1>&2 "Or simply: $0 theme-6.x-1.10.tar.gz"
 	exit 0
 fi
 
@@ -116,8 +120,8 @@ THEME_NAME=`expr substr $NEW_THEME_FILENAME 1 $SEPARATOR_POSITION`
 if [ "$WEB_URL" != "" ]; then
 	# Check parameters to update theme in web dir.
 	if [ "$WEBS_DIR" = "" -o "$NEW_THEME_PATH" = "" ]; then
-		echo 1>&2 Usage: $0 -d /var/wwwlib -w /var/www -v 5 -N theme-5.x-1.10.tar.gz
-		echo 1>&2    Or: $0 -W example.com -N theme-5.x-1.10.tar.gz
+		echo 1>&2 Usage: $0 -d /var/lib -w /var/www -v 6 -N theme-6.x-1.10.tar.gz
+		echo 1>&2    Or: $0 -W example.com theme-6.x-1.10.tar.gz
 		exit 127
 	fi
 
@@ -135,8 +139,8 @@ if [ "$WEB_URL" != "" ]; then
 else
 	# Check parameters to update theme in Drupal code base dir.
 	if [ "$DRUPAL_VERSION" = "" -o "$DRUPAL_DIR" = "" -o "$NEW_THEME_PATH" = "" ]; then
-		echo 1>&2 Usage: $0 -d /var/wwwlib -w /var/www -v 5 -N theme-5.x-1.10.tar.gz
-		echo 1>&2    Or: $0 -W example.com -N theme-5.x-1.10.tar.gz
+		echo 1>&2 Usage: $0 -d /var/lib -w /var/www -v 6 -N theme-6.x-1.10.tar.gz
+		echo 1>&2    Or: $0 -W example.com theme-6.x-1.10.tar.gz
 		exit 127
 	fi
 
@@ -178,7 +182,6 @@ echo "Directory moved to $THEMES_DIR/$THEME_NAME."
 # Display some form of success message to the user.
 echo
 echo "All done."
-echo
 
 exit 0
 
