@@ -154,7 +154,7 @@ if [ "$REMOVE_DATA" = "TRUE" ]; then
 	if [ ! "$NO_BACKUP" = "TRUE" ]; then
 		echo "Backing up data..."
 		CURR_DATE_STRING=`date +%Y%m%d%H%M`
-		mysqldump --host=$DB_HOST --user=$DB_USER --password=$DB_PASS $DB_NAME > "$WEBS_DIR/$OLD_WEB/$OLD_WEB-$CURR_DATE_STRING-db.sql"
+		mysqldump --host=$DB_HOST --user=$DB_USER --password=$DB_PASS $DB_NAME > "$WEBS_DIR/$OLD_WEB/$OLD_WEB-db.sql"
 		echo "Database exported."
 		tar zcf $BACKUP_DIR/$OLD_WEB-$CURR_DATE_STRING-backup.tar.gz -C $WEBS_DIR $OLD_WEB
 		echo "Backed up data to $BACKUP_DIR/$OLD_WEB-$CURR_DATE_STRING-backup.tar.gz"
