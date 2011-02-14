@@ -157,7 +157,7 @@ if [ "$ONLY_FILES" != "TRUE" ]; then
 	fi
 
 	# Check if database already exists.
-	DATABASES=`mysql --host=$DB_HOST --user=$DB_USER --password=$DB_PASS -Bse 'show databases'| egrep -v 'information_schema|mysql'`
+	DATABASES=`mysql --host=$DB_HOST --user=$DB_USER --password=$DB_PASS -Bse 'show databases' | egrep -v 'information_schema|mysql|test'`
 	for DATABASE in $DATABASES; do
 		if [ "$DATABASE" = "$DB_NAME" ]; then
 			# Backup database, if not specified otherwise.
@@ -220,7 +220,6 @@ else
 	# Remove old web folder.
 	rm -R $TEMP_DIR/$WEB_TO_RESTORE-current
 fi
-
 
 # Report success to the user.
 echo "Web $WEB_TO_RESTORE restored."

@@ -57,7 +57,7 @@ if [ "$DMSAK_CONFIG" ]; then
 fi
 
 # Parse parameters.
-while getopts "d:w:v:RNh" flag
+while getopts "w:h" flag
 do
 	case $flag in
 		w)

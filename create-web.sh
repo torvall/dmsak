@@ -160,7 +160,6 @@ mkdir $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB
 mkdir $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/modules
 mkdir $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB/themes
 
-
 # Link the newly created sites/$NEW_WEB directory from Drupal's sites dir.
 ln -s $WEBS_DIR/$NEW_WEB/sites/$NEW_WEB $DRUPAL_BASE_DIR/sites/$NEW_WEB
 
