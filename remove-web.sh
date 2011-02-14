@@ -90,7 +90,7 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "Released under the GNU General Public Licence (GPL)"
 	echo 1>&2 "More info at: http://www.torvall.net"
 	echo 1>&2 ""
-	echo 1>&2 "Usage: $0 [-d <path-to-drupal-dirs>] [-w <path-to-webs-dir>] [-v N] [-R] [-N] <website>"
+	echo 1>&2 "Usage: $0 [-h] [-d <path-to-drupal-dirs>] [-w <path-to-webs-dir>] [-v N] [-R] [-N] <website>"
 	echo 1>&2 ""
 	echo 1>&2 "Parameters:"
 	echo 1>&2 "  -h  Shows this help message"

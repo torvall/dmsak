@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with DMSAK. If not, see <http://www.gnu.org/licenses/>.
 #
-#     Usage: create-web.sh [-d <path-to-drupal-dirs>] [-w <path-to-webs-dir>] [-v N] <website>
+#     Usage: create-web.sh [-h] [-d <path-to-drupal-dirs>] [-w <path-to-webs-dir>] [-v N] <website>
 #
 #   Example: create-web.sh -d /var/wwwlib -w /var/www -v 6 example.com
 # Or simply: create-web.sh example.com
@@ -89,7 +89,7 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "Released under the GNU General Public Licence (GPL)"
 	echo 1>&2 "More info at: http://www.torvall.net"
 	echo 1>&2 ""
-	echo 1>&2 "Usage: $0 [-d <path-to-drupal-dirs>] [-w <path-to-webs-dir>] [-v N] <website>"
+	echo 1>&2 "Usage: $0 [-h] [-d <path-to-drupal-dirs>] [-w <path-to-webs-dir>] [-v N] <website>"
 	echo 1>&2 ""
 	echo 1>&2 "Parameters:"
 	echo 1>&2 "  -h  Shows this help message"
@@ -118,7 +118,7 @@ if [ "$WEBS_DIR" = "" -o "$DRUPAL_VERSION" = "" -o "$DRUPAL_DIR" = "" -o "$NEW_W
 fi
 
 # This is the complete path to the source Drupal folder.
-# Remember that you must have a directory named "drupal-X" where X is its version (5 or 6) at $DRUPAL_DIR.
+# Remember that you must have a directory named "drupal-X" where X is its version (5, 6 or 7) at $DRUPAL_DIR.
 DRUPAL_BASE_DIR="$DRUPAL_DIR/drupal-$DRUPAL_VERSION"
 
 # Get the default settings.php file according to version.
