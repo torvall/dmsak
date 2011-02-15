@@ -143,13 +143,17 @@ fi
 
 # Remove folder and database if requested by user.
 if [ "$REMOVE_DATA" = "TRUE" ]; then
+	# Get database name.
+	DB_NAME=${OLD_WEB//./_}
+	DB_NAME=${DB_NAME//-/_}
+
 	# Get database password interactively if not specified in config.
 	if [ "$DB_PASS" = "" ]; then
 		read -s -p "Enter $DB_USER's database password: " TEMP_PASS
 		DB_PASS=${TEMP_PASS}
 		echo
 	fi
-	DB_NAME=${OLD_WEB//./_}
+
 	# Do a backup unless the user said not to.
 	if [ ! "$NO_BACKUP" = "TRUE" ]; then
 		echo "Backing up data..."
@@ -161,10 +165,12 @@ if [ "$REMOVE_DATA" = "TRUE" ]; then
 	else
 		echo "-N option specified. Data will be deleted without any backup!"
 	fi
+
 	# Drop database.
 	echo "Deleting database..."
 	mysqladmin --host=$DB_HOST --user=$DB_USER --password=$DB_PASS drop "$DB_NAME"
 	echo "Database deleted."
+
 	# Delete the folder and all its contents.
 	echo "Deleting web files..."
 	rm -R $WEBS_DIR/$OLD_WEB

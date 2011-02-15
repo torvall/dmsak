@@ -217,7 +217,9 @@ echo "<?php chdir('$DRUPAL_BASE_DIR'); include('./install.php'); ?>" > $WEBS_DIR
 # Create DB, unless the user said not to.
 if [ "$NO_DATABASE" != "TRUE" ]; then
 	echo "Creating database..."
+	# Get database name.
 	DB_NAME=${NEW_WEB//./_}
+	DB_NAME=${DB_NAME//-/_}
 
 	# Get database password interactively if not specified in config.
 	if [ "$DB_PASS" = "" ]; then
@@ -238,8 +240,6 @@ EOF
 	echo "Permissions set on database."
 
 	# Determine configuration changes to be done.
-	DB_STRING_OLD=""
-	DB_STRING_NEW=""
 	if [ $DRUPAL_VERSION -le "6" ] ; then
 		DB_STRING_OLD="mysql:\/\/username:password@localhost\/databasename"
 		DB_STRING_NEW="mysql:\/\/$DB_USER:$DB_PASS@$DB_HOST\/$DB_NAME"

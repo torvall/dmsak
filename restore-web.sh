@@ -148,7 +148,9 @@ fi
 
 # Restore database.
 if [ "$ONLY_FILES" != "TRUE" ]; then
+	# Get database name.
 	DB_NAME=${WEB_TO_RESTORE//./_}
+	DB_NAME=${DB_NAME//-/_}
 	# Get database password interactively if not specified in config.
 	if [ "$DB_PASS" = "" ]; then
 		read -s -p "Enter $DB_USER's database password: " TEMP_PASS

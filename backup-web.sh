@@ -112,8 +112,11 @@ if [ "$DB_PASS" = "" ]; then
 	echo
 fi
 
-# Backup database.
+# Get database name.
 DB_NAME=${WEB_TO_BACKUP//./_}
+DB_NAME=${DB_NAME//-/_}
+
+# Backup database.
 CURR_DATE_STRING=`date +%Y%m%d%H%M`
 echo "Backing up data..."
 mysqldump --host=$DB_HOST --user=$DB_USER --password=$DB_PASS $DB_NAME > "$WEBS_DIR/$WEB_TO_BACKUP/$WEB_TO_BACKUP-db.sql"
