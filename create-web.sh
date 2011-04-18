@@ -213,6 +213,9 @@ echo "<?php chdir('$DRUPAL_BASE_DIR'); include('./cron.php'); ?>" > $WEBS_DIR/$N
 echo "<?php chdir('$DRUPAL_BASE_DIR'); include('./update.php'); ?>" > $WEBS_DIR/$NEW_WEB/update.php
 echo "<?php chdir('$DRUPAL_BASE_DIR'); include('./xmlrpc.php'); ?>" > $WEBS_DIR/$NEW_WEB/xmlrpc.php
 echo "<?php chdir('$DRUPAL_BASE_DIR'); include('./install.php'); ?>" > $WEBS_DIR/$NEW_WEB/install.php
+if [ $DRUPAL_VERSION -ge "7" ] ; then
+  echo "<?php chdir('$DRUPAL_BASE_DIR'); include('./authorize.php'); ?>" > $WEBS_DIR/$NEW_WEB/authorize.php
+fi
 
 # Create DB, unless the user said not to.
 if [ "$NO_DATABASE" != "TRUE" ]; then
