@@ -213,8 +213,8 @@ if [ "$NO_BACKUP" != "TRUE" ]; then
 	# Rename folder.
 	mv $TEMP_DIR/$WEB_TO_RESTORE-current $TEMP_DIR/$WEB_TO_RESTORE
 	# Backup files.
+        CURR_DATE_STRING=`date +%Y%m%d%H%M`
 	tar zcf $BACKUP_DIR/$WEB_TO_RESTORE-$CURR_DATE_STRING-backup.tar.gz -C $TEMP_DIR $WEB_TO_RESTORE
-	CURR_DATE_STRING=`date +%Y%m%d%H%M`
 	echo "Backed up data to $BACKUP_DIR/$WEB_TO_RESTORE-$CURR_DATE_STRING-backup.tar.gz"
 	# Remove old web folder.
 	rm -R $TEMP_DIR/$WEB_TO_RESTORE
