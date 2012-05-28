@@ -27,16 +27,16 @@
 #
 # More info at: http://www.torvall.net
 
-# Search for config file. First in /etc, then at the user's home and finally in the current working directory.
+# Search for config file. First in the current working directory, then at the user's home and finally in /etc.
 # If all fails, default values will be used.
-if [ -e /etc/dmsak.cfg ]; then
-	DMSAK_CONFIG=/etc/dmsak.cfg
+if [ -e ./dmsak.cfg ]; then
+	DMSAK_CONFIG=./dmsak.cfg
 else
 	if [ -e ~/dmsak.cfg ]; then
 		DMSAK_CONFIG=~/dmsak.cfg
 	else
-		if [ -e ./dmsak.cfg ]; then
-			DMSAK_CONFIG=./dmsak.cfg
+		if [ -e /etc/dmsak.cfg ]; then
+			DMSAK_CONFIG=/etc/dmsak.cfg
 		else
 			# Set reasonable values for the defaults.
 			DRUPAL_VERSION="6"
@@ -115,7 +115,8 @@ fi
 # Get database name.
 DB_NAME=${WEB_TO_BACKUP//./_}
 DB_NAME=${DB_NAME//-/_}
-
+echo $DB_NAME
+exit 1
 # Backup database.
 CURR_DATE_STRING=`date +%Y%m%d%H%M`
 echo "Backing up data..."
