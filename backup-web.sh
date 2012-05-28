@@ -80,7 +80,7 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "Parameters:"
 	echo 1>&2 "  -h  Shows this help message"
 	echo 1>&2 "  -w  Directory containing websites (default: $WEBS_DIR)"
-	echo 1>&2 "  <website> is the domain name of the website to be deleted (ex: example.com)"
+	echo 1>&2 "  <website> is the domain name of the website to be backed-up (ex: example.com)"
 	echo 1>&2 "  Parameter -w is optional. See the config file (dmsak.cfg) to set the default."
 	echo 1>&2 ""
 	echo 1>&2 "Example: $0 example.com"
@@ -115,8 +115,7 @@ fi
 # Get database name.
 DB_NAME=${WEB_TO_BACKUP//./_}
 DB_NAME=${DB_NAME//-/_}
-echo $DB_NAME
-exit 1
+
 # Backup database.
 CURR_DATE_STRING=`date +%Y%m%d%H%M`
 echo "Backing up data..."
