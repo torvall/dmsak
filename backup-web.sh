@@ -20,9 +20,9 @@
 # You should have received a copy of the GNU General Public License
 # along with DMSAK. If not, see <http://www.gnu.org/licenses/>.
 #
-#     Usage: backup-web.sh [-h] [-w <path-to-webs-dir>] <website>
+#     Usage: backup-web.sh [-h] [-w <path-to-webs-dir>] [-b <path-to-backup-dir>] <website>
 #
-#   Example: backup-web.sh -w /var/www example.com
+#   Example: backup-web.sh -w /var/www -b /var/backups example.com
 # Or simply: backup-web.sh example.com
 #
 # More info at: http://www.torvall.net
