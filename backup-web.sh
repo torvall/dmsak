@@ -57,7 +57,7 @@ if [ "$DMSAK_CONFIG" ]; then
 fi
 
 # Parse parameters.
-while getopts "w:h" flag
+while getopts "w:h:b:" flag
 do
 	case $flag in
 		w)
@@ -65,7 +65,11 @@ do
 			;;
 		h)
 			HELP_REQUESTED="TRUE"
-	esac
+			;;
+		b)
+			BACKUP_DIR="$OPTARG"
+			;;
+	esac;
 done
 
 # Check if help was requested.
@@ -78,10 +82,11 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "Usage: $0 [-h] [-w <path-to-webs-dir>] <website>"
 	echo 1>&2 ""
 	echo 1>&2 "Parameters:"
+	echo 1>&2 "  -b  Specify the directory to hold the backup (default: $BACKUP_DIR)"
 	echo 1>&2 "  -h  Shows this help message"
 	echo 1>&2 "  -w  Directory containing websites (default: $WEBS_DIR)"
 	echo 1>&2 "  <website> is the domain name of the website to be backed-up (ex: example.com)"
-	echo 1>&2 "  Parameter -w is optional. See the config file (dmsak.cfg) to set the default."
+	echo 1>&2 "  Parameters -b,-w are optional. See the config file (dmsak.cfg) to set the default."
 	echo 1>&2 ""
 	echo 1>&2 "Example: $0 example.com"
 	exit 0
