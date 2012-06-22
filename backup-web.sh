@@ -20,23 +20,23 @@
 # You should have received a copy of the GNU General Public License
 # along with DMSAK. If not, see <http://www.gnu.org/licenses/>.
 #
-#     Usage: backup-web.sh [-h] [-w <path-to-webs-dir>] <website>
+#     Usage: backup-web.sh [-h] [-w <path-to-webs-dir>] [-b <path-to-backup-dir>] <website>
 #
-#   Example: backup-web.sh -w /var/www example.com
+#   Example: backup-web.sh -w /var/www -b /var/backups example.com
 # Or simply: backup-web.sh example.com
 #
 # More info at: http://www.torvall.net
 
-# Search for config file. First in /etc, then at the user's home and finally in the current working directory.
+# Search for config file. First in the current working directory, then at the user's home and finally in /etc.
 # If all fails, default values will be used.
-if [ -e /etc/dmsak.cfg ]; then
-	DMSAK_CONFIG=/etc/dmsak.cfg
+if [ -e ./dmsak.cfg ]; then
+	DMSAK_CONFIG=./dmsak.cfg
 else
 	if [ -e ~/dmsak.cfg ]; then
 		DMSAK_CONFIG=~/dmsak.cfg
 	else
-		if [ -e ./dmsak.cfg ]; then
-			DMSAK_CONFIG=./dmsak.cfg
+		if [ -e /etc/dmsak.cfg ]; then
+			DMSAK_CONFIG=/etc/dmsak.cfg
 		else
 			# Set reasonable values for the defaults.
 			DRUPAL_VERSION="6"
@@ -57,7 +57,7 @@ if [ "$DMSAK_CONFIG" ]; then
 fi
 
 # Parse parameters.
-while getopts "w:h" flag
+while getopts "w:h:b:" flag
 do
 	case $flag in
 		w)
@@ -65,7 +65,11 @@ do
 			;;
 		h)
 			HELP_REQUESTED="TRUE"
-	esac
+			;;
+		b)
+			BACKUP_DIR="$OPTARG"
+			;;
+	esac;
 done
 
 # Check if help was requested.
@@ -78,10 +82,11 @@ if [ "$HELP_REQUESTED" = "TRUE" ]; then
 	echo 1>&2 "Usage: $0 [-h] [-w <path-to-webs-dir>] <website>"
 	echo 1>&2 ""
 	echo 1>&2 "Parameters:"
+	echo 1>&2 "  -b  Specify the directory to hold the backup (default: $BACKUP_DIR)"
 	echo 1>&2 "  -h  Shows this help message"
 	echo 1>&2 "  -w  Directory containing websites (default: $WEBS_DIR)"
-	echo 1>&2 "  <website> is the domain name of the website to be deleted (ex: example.com)"
-	echo 1>&2 "  Parameter -w is optional. See the config file (dmsak.cfg) to set the default."
+	echo 1>&2 "  <website> is the domain name of the website to be backed-up (ex: example.com)"
+	echo 1>&2 "  Parameters -b,-w are optional. See the config file (dmsak.cfg) to set the default."
 	echo 1>&2 ""
 	echo 1>&2 "Example: $0 example.com"
 	exit 0

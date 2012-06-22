@@ -21,7 +21,7 @@
 # along with DMSAK. If not, see <http://www.gnu.org/licenses/>.
 #
 #
-# instdmod.sh - Installs a new Drupal theme.
+# install-theme.sh - Installs a new Drupal theme.
 #
 #     Usage: install-theme.sh [-d <path-to-drupal-dirs> [-v X] | -w <path-to-webs-dir>] <path-to-theme-tarball>
 #
@@ -31,16 +31,16 @@
 #
 # More info at: http://www.torvall.net
 
-# Search for config file. First in /etc, then at the user's home and finally in the current working directory.
+# Search for config file. First in the current working directory, then at the user's home and finally in /etc.
 # If all fails, default values will be used.
-if [ -e /etc/dmsak.cfg ]; then
-	DMSAK_CONFIG=/etc/dmsak.cfg
+if [ -e ./dmsak.cfg ]; then
+	DMSAK_CONFIG=./dmsak.cfg
 else
 	if [ -e ~/dmsak.cfg ]; then
 		DMSAK_CONFIG=~/dmsak.cfg
 	else
-		if [ -e ./dmsak.cfg ]; then
-			DMSAK_CONFIG=./dmsak.cfg
+		if [ -e /etc/dmsak.cfg ]; then
+			DMSAK_CONFIG=/etc/dmsak.cfg
 		else
 			# Set reasonable values for the defaults.
 			DRUPAL_VERSION="6"
